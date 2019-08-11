@@ -1,5 +1,4 @@
 import windows
-from windows.generated_def import KEY_READ, REG_QWORD
 import json
 import time
 import struct
@@ -35,7 +34,16 @@ class BamEntry(object):
 
 if __name__ == "__main__":
     registry = windows.system.registry
-    bamreg = registry(r'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\UserSettings')
+    win_build = windows.system.build_number
+    if ("10.0.16299" in win_build) or ("10.0.17134" in win_build):
+        bamreg = registry(r'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\UserSettings')
+    elif ("10.0.17763" in win_build) or ("10.0.18362" in win_build):
+        # TODO: we could still get the old entries before the update, if they still exist
+        bamreg = registry(r'HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\bam\State\UserSettings')
+    else:
+        print("Version not supported.")
+        exit()
+    
     sids = bamreg.subkeys
     bam = []
     for phkey_sid in sids:
